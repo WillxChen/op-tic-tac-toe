@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+button {
+  all: unset;
+}
+
 main {
   display: grid;
   justify-content: center;
@@ -27,6 +31,6 @@ main {
   border: 1px solid black;
 }
 
-.tile > p {
+.tile > button {
   place-self: center;
 }
