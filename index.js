@@ -13,7 +13,7 @@
 
 const Gameboard = (() => {
   // Gameboard is responsible for storing the game assets and updating the DOM
-  const board = ["", "", "", "", "", "", "", "", ""];
+  const board = ["x", "", "", "", "", "", "", "", ""];
   const getBoard = () => board;
 
   const addPiece = (index, piece) => {
@@ -34,7 +34,22 @@ const Player = (name) => {
 const GameController = (() => {
   // Handles game flow and game events
   const game = Gameboard;
+  const board = Gameboard.getBoard();
   let activePlayer = [];
+  const winConditions = [
+    // Rows
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+    // Columns
+    [1, 4, 7],
+    [2, 5, 8],
+    [3, 6, 9],
+    // Diagonals
+    [1, 5, 9],
+    [3, 5, 7],
+  ];
+
   const randomizeOrder = (players) => {
     switch (Math.floor(Math.random() * 2) + 1) {
       case 1:
@@ -50,6 +65,36 @@ const GameController = (() => {
     }
   };
 
+  const checkForWin = () => {
+    let isWin = false;
+    // Loop through the board and check against each condition
+    winConditions.forEach((condition) => {
+      let combo = [];
+
+      condition.forEach((cell) => {
+        combo.push(board[cell - 1]);
+      });
+
+      let allMatch = () =>
+        combo.every((value) => value === combo[0] && value !== "");
+
+      //Now check if every number matches
+      if (combo.length > 0 && allMatch()) {
+        isWin = true;
+      }
+    });
+    return isWin;
+  };
+
+  const checkForTie = () => {
+    if (board.includes("")) {
+      return;
+    }
+    if (!checkForWin()) {
+      return true;
+    }
+  };
+
   const switchActivePlayer = () => {
     activePlayer[0] = activePlayer[0] === players[0] ? players[1] : players[0];
   };
@@ -58,6 +103,8 @@ const GameController = (() => {
     const currentPiece = activePlayer[0].piece;
     game.addPiece(index, currentPiece);
     switchActivePlayer();
+    checkForWin();
+    checkForTie();
   };
 
   return { randomizeOrder, activePlayer, playRound };
