@@ -3,7 +3,7 @@
 
 
   Game Flow
-  - Randomize who gets to play first
+  - Randomize who gets to play first - Done
   - Player chooses a tile to play on and game checks if square is already filled
     - if tile is already filled then return error
     - if tile is empty then fill tile in gameBoard with piece
@@ -13,30 +13,16 @@
 
 const Gameboard = (() => {
   // Gameboard is responsible for storing the game assets and updating the DOM
-  const board = document.querySelector(".game-board");
-  const gameBoard = ["x", "o", "x", "o", "x", "o", "x", "o", "x"];
+  const board = ["", "", "", "", "", "", "", "", ""];
+  const getBoard = () => board;
 
-  const render = () => {
-    board.innerHTML = "";
-
-    gameBoard.forEach((tile, index) => {
-      board.innerHTML += `
-      <div class="tile" data-index="${index}">
-      <button>${tile}</button>
-      </div>
-      `;
-    });
-  };
-
-  const addPiece = (tile, piece) => {
-    const index = tile.dataset.index;
-    if (!gameBoard[index]) {
-      gameBoard[index] = piece;
+  const addPiece = (index, piece) => {
+    if (!board[index]) {
+      board[index] = piece;
     }
   };
 
-  render();
-  return { addPiece };
+  return { getBoard, addPiece };
 })();
 
 const Player = (name) => {
@@ -45,11 +31,9 @@ const Player = (name) => {
   return { name, piece };
 };
 
-const GameFlow = (() => {
-  // Handles turn order
-})();
-
 const GameController = (() => {
+  // Handles game flow and game events
+  const game = Gameboard;
   let activePlayer = [];
   const randomizeOrder = (players) => {
     switch (Math.floor(Math.random() * 2) + 1) {
@@ -66,9 +50,49 @@ const GameController = (() => {
     }
   };
 
-  return { randomizeOrder, activePlayer };
+  const switchActivePlayer = () => {
+    activePlayer[0] = activePlayer[0] === players[0] ? players[1] : players[0];
+  };
+
+  const playRound = (index) => {
+    const currentPiece = activePlayer[0].piece;
+    game.addPiece(index, currentPiece);
+    switchActivePlayer();
+  };
+
+  return { randomizeOrder, activePlayer, playRound };
 })();
+
+const VisualController = () => {
+  const game = GameController;
+  const board = document.querySelector(".game-board");
+
+  const render = () => {
+    board.innerHTML = "";
+
+    Gameboard.getBoard().forEach((tile, index) => {
+      board.innerHTML += `
+      <div class="tile">
+      <button data-index="${index}">${tile}</button>
+      </div>
+      `;
+    });
+  };
+
+  const clickTile = (e) => {
+    if (e.target.innerText) return;
+    const index = e.target.dataset.index;
+    game.playRound(index);
+    render();
+  };
+
+  board.addEventListener("click", clickTile);
+
+  render();
+};
 
 const players = [Player("Will"), Player("Juni")];
 
 GameController.randomizeOrder(players);
+
+VisualController();
